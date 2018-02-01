@@ -15,7 +15,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             print 'will run this in server:',self.data
             cmd = os.popen(self.data)
             result = cmd.read()
-            print result
+            if result == '':
+                result = "你输入的命令'%s'无法执行" % self.data
             #返回执行结果
             self.request.sendall(result)
             
