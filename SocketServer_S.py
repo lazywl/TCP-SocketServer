@@ -15,6 +15,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             print 'will run this in server:',self.data
             cmd = os.popen(self.data)
             result = cmd.read()
+            print result
             #返回执行结果
             self.request.sendall(result)
             
