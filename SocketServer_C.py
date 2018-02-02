@@ -14,21 +14,66 @@ while 1:
     data = s.recv(1240)
     print 'Received data from Server:',data
     '''
-while 1:
-    INPUT = raw_input('Input:')
-    if INPUT == 'exit':
-        exit()
-    s.sendall(INPUT)
-    data = s.recv(4096)
-    output = 'Received data from Server:' + os.linesep + data
-    #print type(output)
 
-    try:
-        output = output.decode('utf-8').encode('gb2312')
-    except UnicodeDecodeError as e:
-        pass
-    
-    print output
+while True:
+    INPUT = raw_input('Input:')
+    s.send(INPUT)
+    ch,file_name = INPUT.split()
+    if ch == 'get':
+        get = False
+        f = open('E:/%s'%file_name,'w')
+        while True:
+            print 'recv1'
+            data = s.recv(4096)
+            print 'recv2'
+            if data == 'None':
+                print 'no file name %s'%file_name
+                f.close()
+                break
+            if data != 'done!':
+                print 'ok'
+##                print data
+                f.write(data)
+            else:
+                f.close()
+                get = True
+                print get
+                break
+        if get:
+            print 'get file %s successful'%file_name
+        else:
+            os.remove('E:/%s'%file_name)
+    else:
+        send = False
+        if os.path.exists('E:/%s'%file_name):
+            f = open('E:/%s'%file_name)
+            data = f.read()
+            f.close()
+            s.sendall(data)
+            time.sleep(1)
+            s.send('done!')
+            send = True
+        else:
+            s.send('None')
+        if send:
+            print 'send file %s successful'%file_name
+
+#在服务器段使用ls ,dir 等命令
+##while 1:
+##    INPUT = raw_input('Input:')
+##    if INPUT == 'exit':
+##        exit()
+##    s.sendall(INPUT)
+##    data = s.recv(4096)
+##    output = 'Received data from Server:' + os.linesep + data
+##    #print type(output)
+##
+##    try:
+##        output = output.decode('utf-8').encode('gb2312')
+##    except UnicodeDecodeError as e:
+##        pass
+##    
+##    print output
 
 s.close()
 
