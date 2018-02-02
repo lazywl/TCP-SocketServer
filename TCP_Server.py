@@ -9,11 +9,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             self.data = self.request.recv(4096)
             if not self.data:break
             ch,self.data = self.data.split('#')
-            print ch,self.data
             if ch == 'terminal':
                 #self.request 就是socket的connect对象
-                if not self.data:break
-                #print 'will run this in server:',self.data
                 cmd = os.popen(self.data)
                 result = cmd.read()
                 if result == '':
