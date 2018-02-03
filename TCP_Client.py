@@ -14,6 +14,7 @@ class MyClient(object):
         self.get_user_info()
         #建立user_info的副本,最后比对user_info是否发生变化
         self.user_info_copy = self.user_info[:]
+        self.dir = 'E:/FTP_file/'
 
     def send(self,message):
         self._socket.send(message)
@@ -49,10 +50,44 @@ class MyClient(object):
         return HAVE
     
     def getfile(self,file_name):
-        pass
+        self.send(self.addSeparator('get',file_name))
+        get = False
+        f = open(self.dir + file_name,'wb')
+        while True:
+            data = self.recv()
+            if data == 'None':
+                print 'no file name %s'%file_name
+                f.close()
+                break
+            if data != 'done!':
+                f.write(data)
+            else:
+                f.close()
+                get = True
+                break
+        if get:
+            print 'get file %s successful'%file_name
+        else:
+            os.remove(self.dir + file_name)
 
     def sendfile(self,file_name):
-        pass
+        self.send(self.addSeparator('send',file_name))
+        send = False
+        if os.path.exists(file_name):
+            f = open(file_name,'rb')
+            while True:
+                data = f.read(4096)
+                if not data:
+                    break
+                self.send(data)
+            f.close()
+            time.sleep(0.5)
+            self.send('done!')
+            send = True
+        else:
+            self.send('None')
+        if send:
+            print 'send file %s successful'%file_name
 
     def addSeparator(self,ch,message):
         return '%s#%s' % (ch,message)
@@ -171,10 +206,54 @@ if __name__ == '__main__':
                 else:
                     print 'wrong password,please try again!'
         elif ch == 'getfile':
-            while True:
-                pass
+            getfile = True
+            while getfile:
+                _input = raw_input('(%s)FTP>'%ch)
+                if _input == 'exit':break
+                try:
+                    _ch,file_name = _input.split()
+                except ValueError as e:
+                    print "your input command is wrong,please input again!"
+                    continue
+                if _ch == 'get':
+                    mc.getfile(file_name)
+                elif _ch == 'send':
+                    while True:
+                        Bool = raw_input('Do you want to send file to Server? Y|N:')
+                        if Bool == 'Y' or Bool == 'y':
+                            getfile = False
+                            break
+                        elif Bool == 'N' or Bool == 'n':
+                            break
+                        else:
+                            continue
+                else:
+                    print 'your input command is wrong,please input again!'
+                        
         elif ch == 'sendfile':
-            pass
+            sendfile = True
+            while sendfile:
+                _input = raw_input('(%s)FTP>'%ch)
+                if _input == 'exit':break
+                try:
+                    _ch,file_name = _input.split()
+                except ValueError as e:
+                    print "your input command is wrong,please input again!"
+                    continue
+                if _ch == 'send':
+                    mc.sendfile(file_name)
+                elif _ch == 'get':
+                    while True:
+                        Bool = raw_input('Do you want to get file to Server? Y|N:')
+                        if Bool == 'Y' or Bool == 'y':
+                            sendfile = False
+                            break
+                        elif Bool == 'N' or Bool == 'n':
+                            break
+                        else:
+                            continue
+                else:
+                    print 'your input command is wrong,please input again!'
         else:
             print "no function '%s' ,please iuput again!"%ch
 

@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import SocketServer
+import time
 import os
 
 class MyTCPHandler(SocketServer.BaseRequestHandler):
@@ -16,7 +17,44 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                 if result == '':
                     result = "你输入的命令'%s'无法执行" % self.data
                 #返回执行结果
-                self.request.sendall(result)   
+                self.request.sendall(result)
+            elif ch == 'get':
+                send = False
+                if os.path.exists(self.data):
+                    f = open(self.data,'rb')
+                    while True:
+                        data = f.read(4096)
+                        if not data:
+                            break
+                        self.request.send(data)
+                    f.close()
+                    time.sleep(0.5)
+                    self.request.send('done!')
+                    send = True
+                else:
+                    self.request.send('None')
+                if send:
+                    print 'send file %s successful'%self.data
+            else:
+                get = False
+                self.data = os.path.split(self.data)[1]
+                f = open(self.data,'wb')
+                while True:
+                    data = self.request.recv(4096)
+                    if data == 'None':
+                        print 'no file name %s'%self.data
+                        f.close()
+                        break
+                    if data != 'done!':
+                        f.write(data)
+                    else:
+                        f.close()
+                        get = True
+                        break
+                if get:
+                    print 'get file %s successful'%self.data
+                else:
+                    os.remove(self.data)
 
 if __name__ == "__main__":
     HOST,PORT = 'localhost',9999
