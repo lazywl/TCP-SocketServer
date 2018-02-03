@@ -21,23 +21,18 @@ while True:
     ch,file_name = INPUT.split()
     if ch == 'get':
         get = False
-        f = open('E:/%s'%file_name,'w')
+        f = open('E:/%s'%file_name,'wb')
         while True:
-            print 'recv1'
             data = s.recv(4096)
-            print 'recv2'
             if data == 'None':
                 print 'no file name %s'%file_name
                 f.close()
                 break
             if data != 'done!':
-                print 'ok'
-##                print data
                 f.write(data)
             else:
                 f.close()
                 get = True
-                print get
                 break
         if get:
             print 'get file %s successful'%file_name
@@ -46,11 +41,14 @@ while True:
     else:
         send = False
         if os.path.exists('E:/%s'%file_name):
-            f = open('E:/%s'%file_name)
-            data = f.read()
+            f = open('E:/%s'%file_name,'rb')
+            while True:
+                data = f.read(4096)
+                if not data:
+                    break
+                s.send(data)
             f.close()
-            s.sendall(data)
-            time.sleep(1)
+            time.sleep(0.5)
             s.send('done!')
             send = True
         else:

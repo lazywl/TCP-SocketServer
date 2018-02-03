@@ -16,18 +16,25 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             if not self.data:break
             ch,file_name = self.data.split()
             if ch == 'get':
+                send = False
                 if os.path.exists(file_name):
-                    f = open(file_name)
-                    data = f.read()
+                    f = open(file_name,'rb')
+                    while True:
+                        data = f.read(4096)
+                        if not data:
+                            break
+                        self.request.send(data)
                     f.close()
-                    self.request.sendall(data)
-##                    time.sleep(1)
+                    time.sleep(0.5)
                     self.request.send('done!')
+                    send = True
                 else:
                     self.request.send('None')
+                if send:
+                    print 'send file %s successful'%file_name
             else:
                 get = False
-                f = open(file_name,'w')
+                f = open(file_name,'wb')
                 while True:
                     data = self.request.recv(4096)
                     if data == 'None':
