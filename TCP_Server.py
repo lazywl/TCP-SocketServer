@@ -15,9 +15,11 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                 cmd = os.popen(self.data)
                 result = cmd.read()
                 if result == '':
-                    result = "你输入的命令'%s'无法执行" % self.data
+                    result = "Error:你输入的命令'%s'无法执行" % self.data
                 #返回执行结果
                 self.request.sendall(result)
+                time.sleep(0.5)
+                self.request.send('done')
             elif ch == 'get':
                 send = False
                 if os.path.exists(self.data):
@@ -61,6 +63,6 @@ if __name__ == "__main__":
 
     #开启Server并绑定地址和端口号
     server = SocketServer.ThreadingTCPServer((HOST,PORT),MyTCPHandler)
-
+  
     #激活服务器，服务器将会一直运行直到按Ctrl-C
     server.serve_forever()

@@ -94,12 +94,16 @@ class MyClient(object):
     
     def use_command(self,ch,cmd):
         self.send(self.addSeparator(ch,cmd))
-        data = self.recv()
-        try:
-            data = data.decode('utf-8').encode('gb2312')
-        except UnicodeDecodeError as e:
-            pass
-        print data
+        while True:
+            data = self.recv()
+            if data == "done":break
+            if not data:break
+            try:
+                data = data.decode('utf-8').encode('gb2312')
+            except UnicodeDecodeError as e:
+                pass
+            print data
+            if data[0:6] == 'Error:':break
 
     def close(self):
 ##        print self.user_info_copy != self.user_info
@@ -128,7 +132,7 @@ def screen_print():
 
 
 if __name__ == '__main__':
-    HOST = 'localhost'
+    HOST = '192.168.0.106'
     PORT = 9999
     mc = MyClient(HOST,PORT)
     print 'Welcome to TCP Client'
