@@ -1,1 +1,2 @@
 # TCP-SocketServer
+基于python的SocketServer模块的一个基础的TCP程序
